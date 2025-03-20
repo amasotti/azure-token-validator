@@ -88,3 +88,8 @@ tid: 00000000-0000-0000-0000-000000000000
 === Graph API Test ===
 Graph API response: {"displayName":"John Doe",...}
 ```
+
+## Related Resources:
+
+- [Azure OIDC Troubleshooting](https://github.com/gary-archer/oauth.blog/blob/master/public/posts/azure-ad-troubleshooting.mdx)
+- [Microsoft - Token and Claims Overview](https://learn.microsoft.com/en-us/entra/identity-platform/security-tokens)
