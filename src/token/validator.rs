@@ -7,7 +7,7 @@ use std::fmt;
 use std::time::{SystemTime, UNIX_EPOCH};
 
 use crate::token::claims::Claims;
-use crate::token::jwk::{Jwk, JwksResponse};
+use crate::token::jwk::JwksResponse;
 
 /// Formats for Azure AD tokens (v1 and v2 endpoints)
 #[derive(Debug, Clone, Copy)]
@@ -70,10 +70,16 @@ impl TokenValidator {
     pub fn get_jwks_uri(&self, format: AzureTokenFormat) -> String {
         match format {
             AzureTokenFormat::V1 => {
-                format!("https://login.microsoftonline.com/{}/discovery/keys", self.config.tenant_id)
+                format!(
+                    "https://login.microsoftonline.com/{}/discovery/keys",
+                    self.config.tenant_id
+                )
             }
             AzureTokenFormat::V2 => {
-                format!("https://login.microsoftonline.com/{}/discovery/v2.0/keys", self.config.tenant_id)
+                format!(
+                    "https://login.microsoftonline.com/{}/discovery/v2.0/keys",
+                    self.config.tenant_id
+                )
             }
             AzureTokenFormat::Common => {
                 "https://login.microsoftonline.com/common/discovery/keys".to_string()
@@ -97,18 +103,14 @@ impl TokenValidator {
         let header = decode_header(token)?;
 
         // Just decode the payload without validating the signature
-        let token_data = decode::<Claims>(
-            token,
-            &DecodingKey::from_secret(&[]),
-            &{
-                let mut validation = Validation::new(Algorithm::RS256);
-                validation.insecure_disable_signature_validation();
-                validation.validate_aud = false;
-                validation.validate_exp = false;
-                validation.validate_nbf = false;
-                validation
-            },
-        )?;
+        let token_data = decode::<Claims>(token, &DecodingKey::from_secret(&[]), &{
+            let mut validation = Validation::new(Algorithm::RS256);
+            validation.insecure_disable_signature_validation();
+            validation.validate_aud = false;
+            validation.validate_exp = false;
+            validation.validate_nbf = false;
+            validation
+        })?;
 
         Ok((json!(header), token_data.claims))
     }
@@ -140,9 +142,7 @@ impl TokenValidator {
 
         // Check expiration if configured to do so
         if self.config.validate_exp {
-            let now = SystemTime::now()
-                .duration_since(UNIX_EPOCH)?
-                .as_secs();
+            let now = SystemTime::now().duration_since(UNIX_EPOCH)?.as_secs();
 
             if claims.exp < now {
                 return Err(anyhow!("Token has expired"));
@@ -150,7 +150,9 @@ impl TokenValidator {
         }
 
         // Get kid from header
-        let kid = header["kid"].as_str().context("Missing 'kid' in token header")?;
+        let kid = header["kid"]
+            .as_str()
+            .context("Missing 'kid' in token header")?;
 
         // Get the appropriate JWKS URI
         let format = self.determine_token_format(&claims);
@@ -158,7 +160,9 @@ impl TokenValidator {
 
         // Fetch JWKS
         let jwks = self.get_jwks(&jwks_uri).await?;
-        let jwk = jwks.find_key(kid).context("Signing key not found in JWKS")?;
+        let jwk = jwks
+            .find_key(kid)
+            .context("Signing key not found in JWKS")?;
         let decoding_key = jwk.to_decoding_key()?;
 
         // Configure validation settings

@@ -4,6 +4,7 @@ use serde::Deserialize;
 
 /// Represents a JSON Web Key from Azure AD
 #[derive(Debug, Deserialize, Clone)]
+#[allow(dead_code)]
 pub struct Jwk {
     pub kid: String,
     pub kty: String,

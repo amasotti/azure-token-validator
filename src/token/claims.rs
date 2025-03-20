@@ -45,7 +45,9 @@ impl Claims {
     pub fn audience_display(&self) -> String {
         match &self.aud {
             Value::String(aud) => aud.clone(),
-            Value::Array(auds) => serde_json::to_string(auds).unwrap_or_else(|_| "Error formatting".to_string()),
+            Value::Array(auds) => {
+                serde_json::to_string(auds).unwrap_or_else(|_| "Error formatting".to_string())
+            }
             _ => "Unknown format".to_string(),
         }
     }

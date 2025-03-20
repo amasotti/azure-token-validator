@@ -1,5 +1,5 @@
-mod token;
 mod api;
+mod token;
 
 use anyhow::Result;
 use clap::Parser;
@@ -142,7 +142,7 @@ async fn main() -> Result<()> {
             } else if args.test_graph && claims.token_type() != TokenType::Access {
                 println!("\n⚠️  Warning: Cannot test Graph API with an ID token. You need an access token.");
             }
-        },
+        }
         Err(e) => println!("❌ Failed to decode token: {}", e),
     }
 
